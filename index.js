@@ -34,10 +34,7 @@ FA.prototype._read = function (start, end) {
 };
 
 FA.prototype.get = function (index, cb) {
-    this._read(index, index + 1, function (err, xs) {
-        if (err) cb(err)
-        else cb(null, xs[0])
-    });
+    this._read(index, index + 1, cb);
 };
 
 FA.prototype._read = function (start, end, cb) {
@@ -47,31 +44,32 @@ FA.prototype._read = function (start, end, cb) {
     }
     
     var found = false;
-    var lines = null;
+    var line = null;
     var index = self.offsets[start] === undefined ? 0 : start;
     var offset = self.offsets[start] !== undefined ? self.offsets[start] : 0;
-    if (index === start) lines = [''];
+    if (index === start) line = '';
     
     fs.read(self.fd, self.buffer, 0, self.buffer.length, offset,
     function (err, bytesRead, buf) {
         if (err) return cb(err);
         
         for (var i = 0; i < bytesRead; i++) {
-            if (lines) {
-                lines[lines.length-1] += String.fromCharCode(buf[i]);
-            }
+            if (index >= start) line += String.fromCharCode(buf[i]);
+            
             if (buf[i] === 0x0a) {
                 self.offsets[i] = index ++;
                 if (index === start) {
-                    lines = [];
+                    line = '';
                 }
+                else if (index > start) {
+                    cb(null, line);
+                }
+                
                 if (index === end) {
-                    cb(null, lines);
                     found = true;
-                    lines = null;
+                    line = null;
                     break;
                 }
-                else if (lines) lines.push('')
             }
         }
         
@@ -79,7 +77,16 @@ FA.prototype._read = function (start, end, cb) {
     });
 };
 
-FA.prototype.slice = function (start, end) {
+FA.prototype.slice = function (start, end, cb) {
+    if (typeof end === 'function') {
+        cb = end;
+        end = undefined;
+    }
+    if (cb) {
+    }
+    
+    var tr = through();
+    return tr;
 };
 
 FA.prototype.splice = function (start, length) {
