@@ -34,7 +34,10 @@ FA.prototype._read = function (start, end) {
 };
 
 FA.prototype.get = function (index, cb) {
-    this._read(index, index + 1, cb);
+    this._read(index, index + 1, function (err, line) {
+        if (err) cb(err)
+        else if (line !== null) cb(null, line)
+    });
 };
 
 FA.prototype._read = function (start, end, cb) {
@@ -63,6 +66,7 @@ FA.prototype._read = function (start, end, cb) {
                 }
                 else if (index > start) {
                     cb(null, line);
+                    line = '';
                 }
                 
                 if (index === end) {
@@ -78,14 +82,11 @@ FA.prototype._read = function (start, end, cb) {
 };
 
 FA.prototype.slice = function (start, end, cb) {
-    if (typeof end === 'function') {
-        cb = end;
-        end = undefined;
-    }
-    if (cb) {
-    }
-    
     var tr = through();
+    this._read(start, end, function (err, line) {
+        if (err) return tr.emit('error', err);
+        else tr.queue(line)
+    });
     return tr;
 };
 

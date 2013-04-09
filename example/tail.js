@@ -8,3 +8,5 @@ s.get(0, function (err, line) {
 s.get(100, function (err, line) {
     console.log('line 100: ' + line.trim());
 });
+
+s.slice(104, 108).pipe(process.stdout);
