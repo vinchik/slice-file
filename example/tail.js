@@ -10,5 +10,5 @@ s.get(100, function (err, line) {
 });
 
 setTimeout(function () {
-    s.slice(4, 8).pipe(process.stdout);
+    s.slice(104, 108).pipe(process.stdout);
 }, 100);

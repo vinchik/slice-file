@@ -57,7 +57,6 @@ FA.prototype._read = function (start, end, cb) {
             break;
         }
     }
-console.log('offset=' + offset);
     
     if (index === start) line = '';
     
@@ -87,7 +86,7 @@ console.log('offset=' + offset);
             }
         }
         
-        if (!found) self._read(index, end, cb);
+        if (!found) self._read(Math.max(start, index), end, cb);
     });
 };
 
