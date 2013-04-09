@@ -48,8 +48,17 @@ FA.prototype._read = function (start, end, cb) {
     
     var found = false;
     var line = null;
-    var index = self.offsets[start] === undefined ? 0 : start;
-    var offset = self.offsets[start] !== undefined ? self.offsets[start] : 0;
+    
+    var index = 0, offset = 0;
+    for (var i = start; i > 0; i--) {
+        if (self.offsets[i] !== undefined) {
+            index = i;
+            offset = self.offsets[i];
+            break;
+        }
+    }
+console.log('offset=' + offset);
+    
     if (index === start) line = '';
     
     fs.read(self.fd, self.buffer, 0, self.buffer.length, offset,
@@ -60,7 +69,8 @@ FA.prototype._read = function (start, end, cb) {
             if (index >= start) line += String.fromCharCode(buf[i]);
             
             if (buf[i] === 0x0a) {
-                self.offsets[i] = index ++;
+                self.offsets[++index] = offset + i + 1;
+                
                 if (index === start) {
                     line = '';
                 }
