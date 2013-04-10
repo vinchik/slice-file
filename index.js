@@ -117,28 +117,20 @@ FA.prototype._readReverse = function (start, end, cb) {
     }
     offset = Math.max(0, offset - self.buffer.length);
     
-    if (index === end) lines = [[]];
+    if (index === end) lines = [];
     
     fs.read(self.fd, self.buffer, 0, self.buffer.length, offset,
     function (err, bytesRead, buf) {
         if (err) return cb(err);
         
         for (var i = bytesRead - 1; i >= 0; i--) {
-            if (index <= end) {
-                lines[0].unshift(buf[i]);
-            }
-            
             if (buf[i] === 0x0a) {
-                self.offsets[--index] = offset + i + 1;
+                self.offsets[--index] = offset + i;
                 
                 if (index === end) {
                     lines = [];
                 }
-                else if (index < end) {
-                    lines.unshift([]);
-                }
-                
-                if (index === start) {
+                else if (index === start - 1) {
                     found = true;
                     lines.forEach(function (xs) {
                         cb(null, Buffer(xs));
@@ -146,6 +138,13 @@ FA.prototype._readReverse = function (start, end, cb) {
                     lines = null;
                     break;
                 }
+                else if (index < end) {
+                    lines.unshift([]);
+                }
+            }
+            
+            if (index <= end) {
+                lines[0].unshift(buf[i]);
             }
         }
         
