@@ -56,24 +56,24 @@ FA.prototype._read = function (start, end, cb) {
         }
     }
     
-    if (index === start) line = '';
+    if (index === start) line = [];
     
     fs.read(self.fd, self.buffer, 0, self.buffer.length, offset,
     function (err, bytesRead, buf) {
         if (err) return cb(err);
         
         for (var i = 0; i < bytesRead; i++) {
-            if (index >= start) line += String.fromCharCode(buf[i]);
+            if (index >= start) line.push(buf[i]);
             
             if (buf[i] === 0x0a) {
                 self.offsets[++index] = offset + i + 1;
                 
                 if (index === start) {
-                    line = '';
+                    line = [];
                 }
                 else if (index > start) {
-                    cb(null, line);
-                    line = '';
+                    cb(null, Buffer(line));
+                    line = [];
                 }
                 
                 if (index === end) {
