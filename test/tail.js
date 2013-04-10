@@ -1,6 +1,7 @@
 var test = require('tap').test;
 var tie = require('../');
 var through = require('through');
+var fs = require('fs');
 var wordFile = __dirname + '/data/words';
 
 test('short tail', function (t) {
@@ -30,4 +31,33 @@ test('short tail', function (t) {
             "études\n",
         ]);
     }
+});
+
+test('long tail', function (t) {
+    var lines = fs.readFileSync(wordFile, 'utf8').split('\n');
+    lines.pop();
+    
+    var xs = tie(wordFile);
+    
+    var amounts = [ 10, 100, 500, 1000, 5000, 10000, 50000 ];
+    t.plan(amounts.reduce(function (sum, n) { return sum + n + 1 }, 0));
+    
+    (function shift () {
+        if (amounts.length === 0) return;
+        var n = amounts.shift();
+        console.log('n=' + n);
+        var res = [];
+        
+        xs.slice(-n).pipe(through(write, end));
+        
+        function write (line) {
+            t.ok(Buffer.isBuffer(line));
+            res.push(String(line).trim());
+        }
+        
+        function end () {
+            t.deepEqual(res, lines.slice(-n));
+            shift();
+        }
+    })();
 });
