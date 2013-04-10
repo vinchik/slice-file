@@ -33,7 +33,7 @@ test('first ten', function (t) {
     }
 });
 
-test('positive slices', function (t) {
+test('slices', function (t) {
     var lines = fs.readFileSync(wordFile, 'utf8').split('\n');
     lines.pop();
     
@@ -48,7 +48,10 @@ test('positive slices', function (t) {
         [ 500, 580 ],
         [ 2200, 2400 ],
         [ 2200, 2400 ],
-        [ 10200, 10240 ]
+        [ 10200, 10240 ],
+        [ -500 ],
+        [ -3000, -50 ],
+        [ 70000 ]
     ];
     t.plan(slices.length);
     
