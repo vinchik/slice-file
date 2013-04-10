@@ -79,6 +79,7 @@ FA.prototype._read = function (start, end, cb) {
                 if (index === end) {
                     found = true;
                     line = null;
+                    cb(null, null);
                     break;
                 }
             }
@@ -135,6 +136,7 @@ FA.prototype._readReverse = function (start, end, cb) {
                     lines.forEach(function (xs) {
                         cb(null, Buffer(xs));
                     });
+                    cb(null, null);
                     lines = null;
                     break;
                 }

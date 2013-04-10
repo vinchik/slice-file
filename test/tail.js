@@ -5,9 +5,6 @@ var wordFile = __dirname + '/data/words';
 
 test('short tail', function (t) {
     t.plan(11);
-    t.on('end', function () {
-        console.log('end');
-    });
     
     var xs = tie(wordFile);
     var res = [];
