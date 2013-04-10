@@ -4,6 +4,11 @@ var split = require('split');
 var EventEmitter = require('events').EventEmitter;
 var inherits = require('inherits');
 
+var nextTick = typeof setImmediate === 'function'
+    ? setImmediate
+    : process.nextTick
+;
+
 module.exports = function (file, opts) {
     if (!opts) opts = {};
     if (opts.flags === undefined) opts.flags = 'r';
@@ -35,7 +40,7 @@ FA.prototype._read = function (start, end, cb) {
     if (self.fd === undefined) {
         return self.on('open', self._read.bind(self, start, end, cb));
     }
-    if (start < 0) return this._readReverse(start, end, cb);
+    if (start < 0) return self._readReverse(start, end, cb);
     
     var found = false;
     var line = null;
@@ -82,7 +87,7 @@ FA.prototype._read = function (start, end, cb) {
     });
 };
 
-FA.prototype._readReverse = function (start, end, cb, lines) {
+FA.prototype._readReverse = function (start, end, cb) {
     var self = this;
     if (self.fd === undefined) {
         return self.once('open', self._readReverse.bind(self, start, end, cb));
@@ -94,12 +99,15 @@ FA.prototype._readReverse = function (start, end, cb, lines) {
             self.emit('stat', stat);
         });
         return self.once('stat', function () {
-            self._readReverse(start, end, cb, lines)
+            self._readReverse(start, end, cb)
         });
     }
     
     var found = false;
     
+    if (end === 0) return nextTick(function () {
+        cb(null, null);
+    });
     if (end === undefined) end = 0;
     var index = 0, offset = self.stat.size;
     
@@ -112,7 +120,8 @@ FA.prototype._readReverse = function (start, end, cb, lines) {
     }
     offset = Math.max(0, offset - self.buffer.length);
     
-    if (!lines && index === end) lines = [];
+    var lines = null;
+    if (index === end) lines = [];
     
     (function _read () {
         fs.read(self.fd, self.buffer, 0, self.buffer.length, offset,
