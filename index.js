@@ -30,13 +30,6 @@ function FA (file, opts) {
 
 inherits(FA, EventEmitter);
 
-FA.prototype.get = function (index, cb) {
-    this._read(index, index + 1, function (err, line) {
-        if (err) cb(err)
-        else if (line !== null) cb(null, line)
-    });
-};
-
 FA.prototype._read = function (start, end, cb) {
     var self = this;
     if (self.fd === undefined) {
@@ -167,19 +160,4 @@ FA.prototype.slice = function (start, end, cb) {
         else tr.queue(line)
     });
     return tr;
-};
-
-FA.prototype.splice = function (start, length) {
-};
-
-FA.prototype.shift = function () {
-};
-
-FA.prototype.unshift = function () {
-};
-
-FA.prototype.push = function () {
-};
-
-FA.prototype.pop = function () {
 };
