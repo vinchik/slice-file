@@ -140,7 +140,8 @@ FA.prototype._readReverse = function (start, end, cb, lines) {
                     }
                 }
                 
-                if (index <= end) {
+                if (index < end) {
+                    if (!lines[0]) lines[0] = [];
                     lines[0].unshift(buf[i]);
                 }
             }
