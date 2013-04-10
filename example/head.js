@@ -1,4 +1,4 @@
 var fileArray = require('../');
-var s = fileArray('/usr/share/dict/words');
+var xs = fileArray('/usr/share/dict/words');
 
-s.slice(70000).pipe(process.stdout);
+xs.slice(7).pipe(process.stdout);

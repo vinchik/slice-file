@@ -59,6 +59,7 @@ FA.prototype._read = function (start, end, cb) {
     fs.read(self.fd, self.buffer, 0, self.buffer.length, offset,
     function (err, bytesRead, buf) {
         if (err) return cb(err);
+        if (bytesRead === 0) return cb(null, null);
         
         for (var i = 0; i < bytesRead; i++) {
             if (index >= start) line.push(buf[i]);
@@ -127,6 +128,12 @@ FA.prototype._readReverse = function (start, end, cb) {
         fs.read(self.fd, self.buffer, 0, self.buffer.length, offset,
         function (err, bytesRead, buf) {
             if (err) return cb(err);
+            if (bytesRead === 0) {
+                lines.forEach(function (xs) {
+                    cb(null, Buffer(xs));
+                });
+                return cb(null, null);
+            }
             
             for (var i = bytesRead - 1; i >= 0; i--) {
                 if (buf[i] === 0x0a) {
