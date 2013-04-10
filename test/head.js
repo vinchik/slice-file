@@ -53,6 +53,7 @@ test('slices', function (t) {
         [ -3000, -50 ],
         [ -8000, -5000 ],
         [ -5, 0 ],
+        [ -50000 ],
         [ 70000 ]
     ];
     t.plan(slices.length);
