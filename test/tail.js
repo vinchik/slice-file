@@ -39,8 +39,8 @@ test('long tail', function (t) {
     
     var xs = tie(wordFile);
     
-    var amounts = [ 10, 100, 500, 1000, 5000, 10000, 50000 ];
-    t.plan(amounts.reduce(function (sum, n) { return sum + n + 1 }, 0));
+    var amounts = [ 10, 100, 500, 1000, 5000, 10000 ];
+    t.plan(amounts.length);
     
     (function shift () {
         if (amounts.length === 0) return;
@@ -51,7 +51,6 @@ test('long tail', function (t) {
         xs.slice(-n).pipe(through(write, end));
         
         function write (line) {
-            t.ok(Buffer.isBuffer(line));
             res.push(String(line).trim());
         }
         

@@ -89,7 +89,7 @@ FA.prototype._read = function (start, end, cb) {
     });
 };
 
-FA.prototype._readReverse = function (start, end, cb) {
+FA.prototype._readReverse = function (start, end, cb, lines) {
     var self = this;
     if (self.fd === undefined) {
         return self.once('open', self._readReverse.bind(self, start, end, cb));
@@ -100,11 +100,12 @@ FA.prototype._readReverse = function (start, end, cb) {
             self.stat = stat;
             self.emit('stat', stat);
         });
-        return self.once('stat', self._readReverse.bind(self, start, end, cb));
+        return self.once('stat', function () {
+            self._readReverse(start, end, cb, lines)
+        });
     }
     
     var found = false;
-    var lines = null;
     
     if (end === undefined) end = 0;
     var index = 0, offset = self.stat.size;
@@ -118,40 +119,45 @@ FA.prototype._readReverse = function (start, end, cb) {
     }
     offset = Math.max(0, offset - self.buffer.length);
     
-    if (index === end) lines = [];
+    if (!lines && index === end) lines = [];
     
-    fs.read(self.fd, self.buffer, 0, self.buffer.length, offset,
-    function (err, bytesRead, buf) {
-        if (err) return cb(err);
-        
-        for (var i = bytesRead - 1; i >= 0; i--) {
-            if (buf[i] === 0x0a) {
-                self.offsets[--index] = offset + i;
+    (function _read () {
+        fs.read(self.fd, self.buffer, 0, self.buffer.length, offset,
+        function (err, bytesRead, buf) {
+            if (err) return cb(err);
+            
+            for (var i = bytesRead - 1; i >= 0; i--) {
+                if (buf[i] === 0x0a) {
+                    self.offsets[--index] = offset + i;
+                    
+                    if (index === end) {
+                        lines = [];
+                    }
+                    else if (index === start - 1) {
+                        found = true;
+                        lines.forEach(function (xs) {
+                            cb(null, Buffer(xs));
+                        });
+                        cb(null, null);
+                        lines = null;
+                        break;
+                    }
+                    else if (index < end) {
+                        lines.unshift([]);
+                    }
+                }
                 
-                if (index === end) {
-                    lines = [];
-                }
-                else if (index === start - 1) {
-                    found = true;
-                    lines.forEach(function (xs) {
-                        cb(null, Buffer(xs));
-                    });
-                    cb(null, null);
-                    lines = null;
-                    break;
-                }
-                else if (index < end) {
-                    lines.unshift([]);
+                if (index <= end) {
+                    lines[0].unshift(buf[i]);
                 }
             }
             
-            if (index <= end) {
-                lines[0].unshift(buf[i]);
+            if (!found) {
+                offset -= bytesRead;
+                _read();
             }
-        }
-        
-        if (!found) self._readReverse(Math.min(start, index), end, cb);
-    });
+        });
+    })();
 };
 
 FA.prototype.slice = function (start, end, cb) {
