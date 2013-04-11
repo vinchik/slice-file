@@ -1,6 +1,5 @@
 var fs = require('fs');
 var through = require('through');
-var split = require('split');
 var EventEmitter = require('events').EventEmitter;
 var inherits = require('inherits');
 

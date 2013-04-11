@@ -1,6 +1,6 @@
 # slice-file
 
-stream file slices by line numbers
+stream file slices by line number indexes
 
 # example
 
@@ -54,7 +54,7 @@ var sf = require('slice-file')
 
 ## var xs = sf(filename, opts={})
 
-Create a line-file instance `xs` from a `filename` and some options `opts`.
+Create a slice-file instance `xs` from a `filename` and some options `opts`.
 
 These `opts` are passed to `fs.open()`:
 
@@ -83,7 +83,7 @@ With [npm](https://npmjs.org) do:
 
 
 ```
-npm install line-file
+npm install slice-file
 ```
 
 # license
