@@ -39,6 +39,7 @@ FA.prototype._read = function (start, end, cb) {
     if (self.fd === undefined) {
         return self.on('open', self._read.bind(self, start, end, cb));
     }
+    if (start === undefined) start = 0;
     if (start < 0) return self._readReverse(start, end, cb);
     
     var found = false;
