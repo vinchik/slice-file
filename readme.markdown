@@ -2,6 +2,8 @@
 
 stream file slices by line number indexes
 
+[![build status](https://secure.travis-ci.org/substack/slice-file.png)](http://travis-ci.org/substack/slice-file)
+
 # example
 
 ## positive slice
