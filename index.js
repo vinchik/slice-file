@@ -97,6 +97,17 @@ FA.prototype._read = function (start, end, cb) {
     })();
 };
 
+FA.prototype._stat = function (cb) {
+    var self = this;
+    fs.stat(self.file, function (err, stat) {
+        if (err) return cb && cb(err);
+        
+        self.stat = stat;
+        self.emit('stat', stat);
+        if (cb) cb(null, stat);
+    });
+};
+
 FA.prototype._readReverse = function (start, end, cb) {
     var self = this;
     if (self.fd === undefined) {
@@ -105,12 +116,8 @@ FA.prototype._readReverse = function (start, end, cb) {
         });
     }
     if (self.stat === undefined) {
-        fs.stat(self.file, function (err, stat) {
-            if (err) return cb(err);
-            self.stat = stat;
-            self.emit('stat', stat);
-        });
-        return self.once('stat', function () {
+        return self._stat(function (err) {
+            if (err) cb(err);
             self._readReverse(start, end, cb)
         });
     }
@@ -210,5 +217,15 @@ FA.prototype.slice = function (start, end, cb) {
         if (cb && line === null) cb(null, res)
         else if (cb) res.push(line)
     });
+    return tr;
+};
+
+FA.prototype.follow = function (start, end) {
+    var tr = through();
+    var slice = this.slice(start, end);
+    slice.once('end', function () {
+        
+    });
+    slice.pipe(tr, { end: false });
     return tr;
 };
