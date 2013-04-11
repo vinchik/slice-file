@@ -57,36 +57,42 @@ FA.prototype._read = function (start, end, cb) {
     if (index === start) line = [];
     
     var buffer = new Buffer(self.bufsize);
-    fs.read(self.fd, buffer, 0, buffer.length, offset,
-    function (err, bytesRead, buf) {
-        if (err) return cb(err);
-        if (bytesRead === 0) return cb(null, null);
-        
-        for (var i = 0; i < bytesRead; i++) {
-            if (index >= start) line.push(buf[i]);
+    
+    (function _read () {
+        fs.read(self.fd, buffer, 0, buffer.length, offset,
+        function (err, bytesRead, buf) {
+            if (err) return cb(err);
+            if (bytesRead === 0) return cb(null, null);
             
-            if (buf[i] === 0x0a) {
-                self.offsets[++index] = offset + i + 1;
+            for (var i = 0; i < bytesRead; i++) {
+                if (index >= start) line.push(buf[i]);
                 
-                if (index === start) {
-                    line = [];
-                }
-                else if (index > start) {
-                    cb(null, Buffer(line));
-                    line = [];
-                }
-                
-                if (index === end) {
-                    found = true;
-                    line = null;
-                    cb(null, null);
-                    break;
+                if (buf[i] === 0x0a) {
+                    self.offsets[++index] = offset + i + 1;
+                    
+                    if (index === start) {
+                        line = [];
+                    }
+                    else if (index > start) {
+                        cb(null, Buffer(line));
+                        line = [];
+                    }
+                    
+                    if (index === end) {
+                        found = true;
+                        line = null;
+                        cb(null, null);
+                        break;
+                    }
                 }
             }
-        }
-        
-        if (!found) self._read(Math.max(start, index), end, cb);
-    });
+            
+            if (!found) {
+                offset += bytesRead;
+                _read();
+            }
+        });
+    })();
 };
 
 FA.prototype._readReverse = function (start, end, cb) {
