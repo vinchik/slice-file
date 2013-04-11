@@ -29,6 +29,8 @@ function FA (file, opts) {
     this.file = file;
     this.offsets = { 0: 0 };
     this.bufsize = opts.bufsize || 4 * 1024;
+    this.flags = opts.flags;
+    this.mode = opts.mode;
 }
 
 inherits(FA, EventEmitter);
@@ -221,11 +223,51 @@ FA.prototype.slice = function (start, end, cb) {
 };
 
 FA.prototype.follow = function (start, end) {
+    var self = this;
     var tr = through();
+    tr.close = function () {
+        this.closed = true;
+        this.emit('close');
+    };
+    
     var slice = this.slice(start, end);
+    
     slice.once('end', function () {
+        if (tr.closed) return;
+        var w = fs.watch(self.file, { fd: self.fd });
+        tr.once('close', function () { w.close() });
+        
+        if (!self.stat) self._stat(onstat);
+        else onstat(null, self.stat);
+        
+        w.on('change', function (type) {
+            if (type !== 'change') return;
+            self._stat(onstat);
+        });
         
     });
+    var lastStat = null;
     slice.pipe(tr, { end: false });
     return tr;
+    
+    function onstat (err, stat) {
+        if (err) return tr.emit('error', err);
+        if (!lastStat) return lastStat = stat;
+        
+        if (stat.size < lastStat.size) {
+            tr.emit('truncate', lastStat.size - stat.size);
+        }
+        else if (stat.size > lastStat.size) {
+            var stream = fs.createReadStream(self.file, {
+                fd: self.fd,
+                flags: self.flags,
+                mode: self.mode,
+                autoClose: false,
+                bufferSize: self.bufsize
+            });
+            stream.pipe(tr, { end: false });
+        }
+        
+        lastStat = stat;
+    }
 };
