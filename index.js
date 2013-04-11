@@ -62,7 +62,10 @@ FA.prototype._read = function (start, end, cb) {
         fs.read(self.fd, buffer, 0, buffer.length, offset,
         function (err, bytesRead, buf) {
             if (err) return cb(err);
-            if (bytesRead === 0) return cb(null, null);
+            if (bytesRead === 0) {
+                if (line && line.length) cb(null, Buffer(line));
+                return cb(null, null);
+            }
             
             for (var i = 0; i < bytesRead; i++) {
                 if (index >= start) line.push(buf[i]);
