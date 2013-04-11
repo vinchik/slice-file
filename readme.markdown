@@ -1,4 +1,4 @@
-# line-file
+# slice-file
 
 stream file slices by line numbers
 
@@ -7,8 +7,8 @@ stream file slices by line numbers
 ## positive slice
 
 ``` js
-var lf = require('line-file');
-var words = lf('/usr/share/dict/words');
+var sf = require('slice-file');
+var words = sf('/usr/share/dict/words');
 words.slice(22398,22408).pipe(process.stdout);
 ```
 
@@ -28,8 +28,8 @@ beer's
 ## tail
 
 ``` js
-var lf = require('line-file');
-var xs = lf('/usr/share/dict/words');
+var sf = require('slice-file');
+var xs = sf('/usr/share/dict/words');
 xs.slice(-10).pipe(process.stdout);
 ```
 
@@ -49,10 +49,10 @@ xs.slice(-10).pipe(process.stdout);
 # methods
 
 ``` js
-var lf = require('line-file')
+var sf = require('slice-file')
 ```
 
-## var xs = lf(filename, opts={})
+## var xs = sf(filename, opts={})
 
 Create a line-file instance `xs` from a `filename` and some options `opts`.
 
