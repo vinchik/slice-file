@@ -4,6 +4,21 @@ var through = require('through');
 var fs = require('fs');
 var wordFile = __dirname + '/data/words';
 
+test('implicit start=0', function (t) {
+    t.plan(1);
+    
+    var file = __dirname + '/data/lines.txt';
+    var s = lf(file).slice();
+    var res = [];
+    s.pipe(through(write, end));
+    function write (buf) { res.push(String(buf)) }
+    function end () {
+        t.deepEqual(res, [
+            "\n", "two\n", "three\n", "\n", "five\n", "six\n", "\n"
+        ]);
+    }
+});
+
 test('first ten', function (t) {
     t.plan(11);
     
