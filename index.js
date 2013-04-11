@@ -30,7 +30,7 @@ function FA (file, opts) {
     this.file = file;
     this.offsets = { 0: 0 };
     this._mean = { value: 80, samples: 0 };
-    this.buffer = new Buffer(opts.bufsize || 4 * 1024);
+    this.bufsize = opts.bufsize || 4 * 1024;
 }
 
 inherits(FA, EventEmitter);
@@ -56,7 +56,8 @@ FA.prototype._read = function (start, end, cb) {
     
     if (index === start) line = [];
     
-    fs.read(self.fd, self.buffer, 0, self.buffer.length, offset,
+    var buffer = new Buffer(self.bufsize);
+    fs.read(self.fd, buffer, 0, buffer.length, offset,
     function (err, bytesRead, buf) {
         if (err) return cb(err);
         if (bytesRead === 0) return cb(null, null);
@@ -119,13 +120,14 @@ FA.prototype._readReverse = function (start, end, cb) {
             break;
         }
     }
-    offset = Math.max(0, offset - self.buffer.length);
+    var buffer = new Buffer(self.bufsize);
+    offset = Math.max(0, offset - buffer.length);
     
     var lines = null;
     if (index === end) lines = [];
     
     (function _read () {
-        fs.read(self.fd, self.buffer, 0, self.buffer.length, offset,
+        fs.read(self.fd, buffer, 0, buffer.length, offset,
         function (err, bytesRead, buf) {
             if (err) return cb(err);
             if (bytesRead === 0) {

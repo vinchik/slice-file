@@ -1,5 +1,5 @@
 var test = require('tap').test;
-var tie = require('../');
+var lf = require('../');
 var through = require('through');
 var fs = require('fs');
 var wordFile = __dirname + '/data/words';
@@ -7,7 +7,7 @@ var wordFile = __dirname + '/data/words';
 test('first ten', function (t) {
     t.plan(11);
     
-    var xs = tie(wordFile);
+    var xs = lf(wordFile);
     var res = [];
     
     xs.slice(0,10).pipe(through(write, end));
@@ -37,7 +37,7 @@ test('slices', function (t) {
     var lines = fs.readFileSync(wordFile, 'utf8').split('\n');
     lines.pop();
     
-    var xs = tie(wordFile);
+    var xs = lf(wordFile);
     
     var slices = [
         [ 10, 20 ],
