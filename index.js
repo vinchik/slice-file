@@ -29,7 +29,6 @@ module.exports = function (file, opts) {
 function FA (file, opts) {
     this.file = file;
     this.offsets = { 0: 0 };
-    this._mean = { value: 80, samples: 0 };
     this.bufsize = opts.bufsize || 4 * 1024;
 }
 
@@ -174,6 +173,11 @@ FA.prototype._readReverse = function (start, end, cb) {
 
 FA.prototype.slice = function (start, end, cb) {
     var res;
+    if (typeof start === 'function') {
+        cb = start;
+        start = 0;
+        end = undefined;
+    }
     if (typeof end === 'function') {
         cb = end;
         end = undefined;
