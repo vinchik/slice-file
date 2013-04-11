@@ -173,10 +173,20 @@ FA.prototype._readReverse = function (start, end, cb) {
 };
 
 FA.prototype.slice = function (start, end, cb) {
+    var res;
+    if (typeof end === 'function') {
+        cb = end;
+        end = undefined;
+    }
+    if (typeof cb === 'function') res = [];
+    
     var tr = through();
     this._read(start, end, function (err, line) {
         if (err) return tr.emit('error', err);
         else tr.queue(line)
+        
+        if (cb && line === null) cb(null, res)
+        else if (cb) res.push(line)
     });
     return tr;
 };

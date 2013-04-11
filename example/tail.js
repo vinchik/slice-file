@@ -1,3 +1,3 @@
-var fileArray = require('../');
-var s = fileArray('/usr/share/dict/words');
-s.slice(-10).pipe(process.stdout);
+var lf = require('../');
+var xs = lf('/usr/share/dict/words');
+xs.slice(-10).pipe(process.stdout);
