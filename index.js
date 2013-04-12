@@ -272,7 +272,7 @@ FA.prototype.follow = function (start, end) {
                 start: lastStat.size,
                 flags: self.flags,
                 mode: self.mode,
-                autoClose: false,
+                //autoClose: false,
                 bufferSize: self.bufsize
             });
             stream.on('error', function (err) { tr.emit('error', err) });
