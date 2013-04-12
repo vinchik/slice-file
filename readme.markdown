@@ -132,6 +132,14 @@ Just like `Array.prototype.slice()`, `i` and `j` may be negative.
 
 If `cb(err, lines)` is given, the lines will be buffered into `lines`.
 
+## var stream = xs.follow(i, j)
+
+Return a readable stream of lines like `xs.slice()`, but instead of ending when
+the end of the file is reached, watch the file and stream new lines appended to
+the end of the file.
+
+This feature takes its name from `tail -f`.
+
 # install
 
 With [npm](https://npmjs.org) do:
