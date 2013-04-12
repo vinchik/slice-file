@@ -13,7 +13,7 @@ test(function (t) {
     var xs = sf(file);
     var res = [];
     xs.follow(-3).pipe(through(function (line) {
-        res.push(String(line));
+        res.push(String(line).trim());
         if (res.length === 3) {
             t.deepEqual(res, [ 'four', 'five', 'six' ]);
             fs.appendFile(file, [ 'seven', 'eight', 'nine', '' ].join('\n'));
