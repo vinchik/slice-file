@@ -259,12 +259,14 @@ FA.prototype.follow = function (start, end) {
         }
         else if (stat.size > lastStat.size) {
             var stream = fs.createReadStream(self.file, {
-                fd: self.fd,
+                //fd: self.fd,
+                start: lastStat.size,
                 flags: self.flags,
                 mode: self.mode,
                 autoClose: false,
                 bufferSize: self.bufsize
             });
+            stream.on('error', function (err) { tr.emit('error', err) });
             stream.pipe(tr, { end: false });
         }
         
