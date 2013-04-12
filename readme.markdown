@@ -140,6 +140,11 @@ the end of the file.
 
 This feature takes its name from `tail -f`.
 
+## xs.close()
+
+Close the underlying file descriptor, stop any streams, and stop any file
+watchers.
+
 # install
 
 With [npm](https://npmjs.org) do:
