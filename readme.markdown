@@ -48,6 +48,59 @@ xs.slice(-10).pipe(process.stdout);
 études
 ```
 
+# follow
+
+Like `tail -f`, slice-file can stream updates after the initial slice.
+
+```
+var sf = require('slice-file');
+var xs = sf('/var/mail/' + process.env.USER);
+xs.follow(-10).pipe(process.stdout);
+```
+
+at first the previous 10 lines will render:
+
+```
+$ node example/mail.js 
+    id A2181740063; Fri, 12 Apr 2013 03:08:30 -0700 (PDT)
+Subject: beep boop
+To: <substack@beep>
+X-Mailer: mail (GNU Mailutils 2.2)
+Message-Id: <20130412100830.A2181740063@beep>
+Date: Fri, 12 Apr 2013 03:08:30 -0700 (PDT)
+From: substack@beep
+
+oh hello
+
+
+```
+
+then if a message is sent:
+
+```
+$ echo ahoy thar | mail -s 'oy' substack
+```
+
+we see more data from the file:
+
+```
+From substack@beep  Fri Apr 12 03:09:13 2013
+Return-Path: <substack@beep>
+X-Original-To: substack@beep
+Delivered-To: substack@beep
+Received: by beep (Postfix, from userid 1000)
+    id 5E0C7740063; Fri, 12 Apr 2013 03:09:13 -0700 (PDT)
+Subject: oy
+To: <substack@beep>
+X-Mailer: mail (GNU Mailutils 2.2)
+Message-Id: <20130412100913.5E0C7740063@beep>
+Date: Fri, 12 Apr 2013 03:09:13 -0700 (PDT)
+From: substack@beep
+
+ahoy thar
+
+```
+
 # methods
 
 ``` js

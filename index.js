@@ -256,7 +256,9 @@ FA.prototype.follow = function (start, end) {
     self.once('close', function () { tr.queue(null) });
     tr.once('close', function () { tr.queue(null) });
     
-    return tr.pipe(split());
+    return tr.pipe(split())
+        .pipe(through(function (line) { this.queue(line + '\n') }))
+    ;
     
     function onstat (err, stat) {
         if (err) return tr.emit('error', err);
