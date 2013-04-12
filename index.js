@@ -2,6 +2,7 @@ var fs = require('fs');
 var through = require('through');
 var EventEmitter = require('events').EventEmitter;
 var inherits = require('inherits');
+var split = require('split');
 
 var nextTick = typeof setImmediate === 'function'
     ? setImmediate
@@ -38,7 +39,7 @@ inherits(FA, EventEmitter);
 FA.prototype._read = function (start, end, cb) {
     var self = this;
     if (self.fd === undefined) {
-        return self.on('open', self._read.bind(self, start, end, cb));
+        return self.once('open', self._read.bind(self, start, end, cb));
     }
     if (start === undefined) start = 0;
     if (start < 0) return self._readReverse(start, end, cb);
@@ -238,6 +239,7 @@ FA.prototype.follow = function (start, end) {
         if (tr.closed) return;
         var w = fs.watch(self.file, { fd: self.fd });
         tr.once('close', function () { w.close() });
+        self.once('close', function () { w.close() });
         
         if (!self.stat) self._stat(onstat);
         else onstat(null, self.stat);
@@ -251,7 +253,10 @@ FA.prototype.follow = function (start, end) {
     });
     var lastStat = null;
     slice.pipe(tr, { end: false });
-    return tr;
+    self.once('close', function () { tr.queue(null) });
+    tr.once('close', function () { tr.queue(null) });
+    
+    return tr.pipe(split());
     
     function onstat (err, stat) {
         if (err) return tr.emit('error', err);
@@ -281,4 +286,12 @@ FA.prototype.follow = function (start, end) {
         
         lastStat = stat;
     }
+};
+
+FA.prototype.close = function () {
+    var self = this;
+    if (self.fd === undefined) return self.once('open', self.close);
+    fs.close(self.fd, function () {
+        self.emit('close');
+    });
 };
