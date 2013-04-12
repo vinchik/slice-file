@@ -231,6 +231,8 @@ FA.prototype.follow = function (start, end) {
     };
     
     var slice = this.slice(start, end);
+    var writing = false;
+    var changed = false;
     
     slice.once('end', function () {
         if (tr.closed) return;
@@ -242,7 +244,8 @@ FA.prototype.follow = function (start, end) {
         
         w.on('change', function (type) {
             if (type !== 'change') return;
-            self._stat(onstat);
+            if (!writing) self._stat(onstat);
+            changed = true;
         });
         
     });
@@ -258,6 +261,7 @@ FA.prototype.follow = function (start, end) {
             tr.emit('truncate', lastStat.size - stat.size);
         }
         else if (stat.size > lastStat.size) {
+            writing = true;
             var stream = fs.createReadStream(self.file, {
                 //fd: self.fd,
                 start: lastStat.size,
@@ -267,6 +271,11 @@ FA.prototype.follow = function (start, end) {
                 bufferSize: self.bufsize
             });
             stream.on('error', function (err) { tr.emit('error', err) });
+            stream.on('end', function () {
+                if (changed) self._stat(onstat);
+                writing = false;
+                changed = false;
+            });
             stream.pipe(tr, { end: false });
         }
         
