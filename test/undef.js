@@ -14,6 +14,6 @@ test('undefined begin, 0 end', function (t) {
     ;
     
     sf(file).slice(0, undefined, function (err, xs) {
-        t.deepEqual(xs, []);
+        t.deepEqual(xs, lines.slice(undefined, 0)); // []
     });;
 });
