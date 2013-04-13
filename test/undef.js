@@ -13,7 +13,7 @@ test('undefined begin, 0 end', function (t) {
         .map(function (line) { return line + '\n' })
     ;
     
-    sf(file).slice(0, undefined, function (err, xs) {
+    sf(file).slice(undefined, 0, function (err, xs) {
         t.deepEqual(xs, lines.slice(undefined, 0)); // []
     });;
 });
