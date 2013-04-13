@@ -180,6 +180,7 @@ FA.prototype._readReverse = function (start, end, cb) {
                         break;
                     }
                     else if (index < end) {
+                        if (!lines) lines = [];
                         lines.unshift([]);
                     }
                 }
