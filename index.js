@@ -44,6 +44,10 @@ FA.prototype._read = function (start, end, cb) {
     if (start === undefined) start = 0;
     if (start < 0) return self._readReverse(start, end, cb);
     
+    if (end !== undefined && end <= start) {
+        return nextTick(function () { cb(null, null) });
+    }
+    
     var found = false;
     var line = null;
     
