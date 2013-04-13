@@ -70,7 +70,10 @@ FA.prototype._read = function (start, end, cb) {
             }
             
             for (var i = 0; i < bytesRead; i++) {
-                if (index >= start) line.push(buf[i]);
+                if (index >= start) {
+                    if (!line) line = [];
+                    line.push(buf[i]);
+                }
                 
                 if (buf[i] === 0x0a) {
                     self.offsets[++index] = offset + i + 1;
