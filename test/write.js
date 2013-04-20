@@ -13,17 +13,17 @@ test(function (t) {
     var xs = sf(file);
     
     xs.follow(-3).pipe(through(write, end));
-    ws.write('one\n');
-    ws.write('two\n');
-    ws.write('three\n');
-    ws.end();
+    ws.write('beep boop\n');
+    
+    setTimeout(function () {
+        xs.close();
+    }, 500);
     
     function write (line) {
         lines.push(line);
-        if (lines.length === 3) xs.close();
     }
     
     function end () {
-        t.deepEqual(lines, [ 'one\n', 'two\n', 'three\n' ]);
+        t.deepEqual(lines, [ 'beep boop\n' ]);
     }
 });
