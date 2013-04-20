@@ -1,6 +1,6 @@
 {
     "name": "slice-file",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "description": "stream file slices by line number indexes",
     "main": "index.js",
     "dependencies": {
