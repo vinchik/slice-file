@@ -158,7 +158,7 @@ FA.prototype._readReverse = function (start, end, cb) {
         fs.read(self.fd, buffer, 0, buffer.length, offset,
         function (err, bytesRead, buf) {
             if (err) return cb(err);
-            if (bytesRead === 0) {
+            if (bytesRead === 0 || offset < 0) {
                 lines.forEach(function (xs) {
                     cb(null, Buffer(xs));
                 });
@@ -264,9 +264,9 @@ FA.prototype.follow = function (start, end) {
     self.once('close', function () { tr.queue(null) });
     tr.once('close', function () { tr.queue(null) });
     
-    return tr.pipe(split())
-        .pipe(through(function (line) { this.queue(line + '\n') }))
-    ;
+    return tr.pipe(split()).pipe(through(function (line) {
+        this.queue(line + '\n');
+    }));
     
     function onstat (err, stat) {
         if (err) return tr.emit('error', err);
