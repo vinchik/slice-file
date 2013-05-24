@@ -118,17 +118,17 @@ FA.prototype._stat = function (cb) {
     });
 };
 
-FA.prototype._readReverse = function (start, end, cb) {
+FA.prototype._readReverse = function (start, end, cb, rev) {
     var self = this;
     if (self.fd === undefined) {
         return self.once('open', function () {
-            self._readReverse(start, end, cb);
+            self._readReverse(start, end, cb, rev);
         });
     }
     if (self.stat === undefined) {
         return self._stat(function (err) {
             if (err) cb(err);
-            self._readReverse(start, end, cb)
+            self._readReverse(start, end, cb, rev)
         });
     }
     
@@ -159,16 +159,22 @@ FA.prototype._readReverse = function (start, end, cb) {
         function (err, bytesRead, buf) {
             if (err) return cb(err);
             if (bytesRead === 0 || offset < 0) {
-                lines.forEach(function (xs) {
-                    cb(null, Buffer(xs));
-                });
+                if (!rev) {
+                    lines.forEach(function (xs) {
+                        cb(null, Buffer(xs));
+                    });
+                }
+                else if (lines.length) {
+                    cb(null, Buffer(lines[0]));
+                }
                 return cb(null, null);
             }
             
             for (var i = bytesRead - 1; i >= 0; i--) {
                 if (buf[i] === 0x0a) {
                     if (firstNewline && i + 1 < bytesRead && index === 0) {
-                        lines.unshift(buf.slice(i+1, bytesRead));
+                        if (rev) cb(buf.slice(i+1, bytesRead))
+                        else lines.unshift(buf.slice(i+1, bytesRead));
                         self.offsets[--index] = offset + i - lines[0].length;
                     }
                     firstNewline = false;
@@ -179,15 +185,23 @@ FA.prototype._readReverse = function (start, end, cb) {
                     }
                     else if (index === start - 1) {
                         found = true;
-                        lines.forEach(function (xs) {
-                            cb(null, Buffer(xs));
-                        });
+                        if (!rev) {
+                            lines.forEach(function (xs) {
+                                cb(null, Buffer(xs));
+                            });
+                        }
+                        else if (lines.length) {
+                            cb(null, Buffer(lines[0]));
+                        }
                         cb(null, null);
                         lines = null;
                         break;
                     }
                     else if (index < end) {
                         if (!lines) lines = [];
+                        if (rev && lines.length) {
+                            cb(null, Buffer(lines[0]));
+                        }
                         lines.unshift([]);
                     }
                 }
@@ -228,6 +242,30 @@ FA.prototype.slice = function (start, end, cb) {
         if (cb && line === null) cb(null, res)
         else if (cb) res.push(line)
     });
+    return tr;
+};
+
+FA.prototype.sliceReverse = function (start, end, cb) {
+    var res;
+    if (typeof start === 'function') {
+        cb = start;
+        start = 0;
+        end = undefined;
+    }
+    if (typeof end === 'function') {
+        cb = end;
+        end = undefined;
+    }
+    if (typeof cb === 'function') res = [];
+    
+    var tr = through();
+    this._readReverse(start, end, function (err, line) {
+        if (err) return tr.emit('error', err);
+        else tr.queue(line)
+        
+        if (cb && line === null) cb(null, res)
+        else if (cb) res.push(line)
+    }, true);
     return tr;
 };
 
