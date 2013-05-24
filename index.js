@@ -36,13 +36,13 @@ function FA (file, opts) {
 
 inherits(FA, EventEmitter);
 
-FA.prototype._read = function (start, end, cb) {
+FA.prototype._read = function (start, end, cb, rev) {
     var self = this;
     if (self.fd === undefined) {
-        return self.once('open', self._read.bind(self, start, end, cb));
+        return self.once('open', self._read.bind(self, start, end, cb, rev));
     }
     if (start === undefined) start = 0;
-    if (start < 0) return self._readReverse(start, end, cb);
+    if (start < 0) return self._readReverse(start, end, cb, rev);
     
     if (end !== undefined && end <= start) {
         return nextTick(function () { cb(null, null) });
@@ -50,6 +50,7 @@ FA.prototype._read = function (start, end, cb) {
     
     var found = false;
     var line = null;
+    var lines = rev && [];
     
     var index = 0, offset = 0;
     for (var i = start; i > 0; i--) {
@@ -69,7 +70,10 @@ FA.prototype._read = function (start, end, cb) {
         function (err, bytesRead, buf) {
             if (err) return cb(err);
             if (bytesRead === 0) {
-                if (line && line.length) cb(null, Buffer(line));
+                if (rev) {
+                    lines.forEach(function (line) { cb(null, line) });
+                }
+                else if (line && line.length) cb(null, Buffer(line));
                 return cb(null, null);
             }
             
@@ -86,13 +90,21 @@ FA.prototype._read = function (start, end, cb) {
                         line = [];
                     }
                     else if (index > start) {
-                        cb(null, Buffer(line));
+                        if (rev) {
+                            lines.unshift(Buffer(line));
+                        }
+                        else {
+                            cb(null, Buffer(line));
+                        }
                         line = [];
                     }
                     
                     if (index === end) {
                         found = true;
                         line = null;
+                        if (rev) {
+                            lines.forEach(function (line) { cb(null, line) });
+                        }
                         cb(null, null);
                         break;
                     }
@@ -263,7 +275,7 @@ FA.prototype.sliceReverse = function (start, end, cb) {
     if (typeof cb === 'function') res = [];
     
     var tr = through();
-    this._readReverse(start, end, function (err, line) {
+    this._read(start, end, function (err, line) {
         if (err) return tr.emit('error', err);
         else tr.queue(line)
         
