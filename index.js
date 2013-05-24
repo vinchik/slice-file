@@ -174,7 +174,10 @@ FA.prototype._readReverse = function (start, end, cb, rev) {
                 if (buf[i] === 0x0a) {
                     if (firstNewline && i + 1 < bytesRead && index === 0) {
                         if (rev) cb(buf.slice(i+1, bytesRead))
-                        else lines.unshift(buf.slice(i+1, bytesRead));
+                        else {
+                            lines.unshift(buf.slice(i+1, bytesRead));
+                            lines.splice(1);
+                        }
                         self.offsets[--index] = offset + i - lines[0].length;
                     }
                     firstNewline = false;
@@ -201,6 +204,7 @@ FA.prototype._readReverse = function (start, end, cb, rev) {
                         if (!lines) lines = [];
                         if (rev && lines.length) {
                             cb(null, Buffer(lines[0]));
+                            lines.splice(1);
                         }
                         lines.unshift([]);
                     }
