@@ -101,6 +101,30 @@ ahoy thar
 
 ```
 
+# reverse
+
+You can also slice in reverse order, which is more efficient for
+negative-indexed slices because the lines don't need to be buffered:
+
+``` js
+var sf = require('slice-file');
+var xs = sf('/usr/share/dict/words');
+xs.sliceReverse(-10).pipe(process.stdout);
+```
+
+```
+événements
+événement
+évolués
+évolué
+étuis
+étui's
+étui
+études
+étude's
+étude
+```
+
 # methods
 
 ``` js
@@ -129,6 +153,14 @@ trailing `"\n"` except for the last line if there is no trailing newline before
 the EOF.
 
 Just like `Array.prototype.slice()`, `i` and `j` may be negative.
+
+If `cb(err, lines)` is given, the lines will be buffered into `lines`.
+
+## var stream = xs.sliceReverse(i, j, cb)
+
+Return a readable stream that emits each line between line numbers `[i,j)`
+just like `.slice()` but in reverse order. This is more efficient for
+negative-indexed slices because the lines don't need to be buffered.
 
 If `cb(err, lines)` is given, the lines will be buffered into `lines`.
 
