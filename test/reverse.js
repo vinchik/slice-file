@@ -14,7 +14,7 @@ test('short reverse tail', function (t) {
     
     function write (line) {
         t.ok(Buffer.isBuffer(line));
-        res.unshift(String(line));
+        res.push(String(line));
     }
     
     function end () {
@@ -34,7 +34,7 @@ test('short reverse tail', function (t) {
 });
 
 test('long reverse tail', function (t) {
-    var lines = fs.readFileSync(wordFile, 'utf8').split('\n');
+    var lines = fs.readFileSync(wordFile, 'utf8').split('\n').reverse();
     lines.pop();
     
     var xs = lf(wordFile);
@@ -51,7 +51,7 @@ test('long reverse tail', function (t) {
         xs.sliceReverse(-n).pipe(through(write, end));
         
         function write (line) {
-            res.unshift(String(line).trim());
+            res.push(String(line).trim());
         }
         
         function end () {
