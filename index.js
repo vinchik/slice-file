@@ -200,12 +200,12 @@ FA.prototype._readReverse = function (start, end, cb, rev) {
                     }
                     else if (index === start - 1) {
                         found = true;
-                        if (!rev) {
+                        if (!rev && lines) {
                             lines.forEach(function (xs) {
                                 cb(null, Buffer(xs));
                             });
                         }
-                        else if (lines.length) {
+                        else if (lines && lines.length) {
                             cb(null, Buffer(lines[0]));
                         }
                         cb(null, null);
