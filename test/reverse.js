@@ -34,7 +34,7 @@ test('short reverse tail', function (t) {
 });
 
 test('long reverse tail', function (t) {
-    var lines = fs.readFileSync(wordFile, 'utf8').split('\n').reverse();
+    var lines = fs.readFileSync(wordFile, 'utf8').split('\n');
     lines.pop();
     
     var xs = lf(wordFile);
@@ -55,7 +55,7 @@ test('long reverse tail', function (t) {
         }
         
         function end () {
-            t.deepEqual(res, lines.slice(-n));
+            t.deepEqual(res, lines.slice(-n).reverse());
             shift();
         }
     })();
