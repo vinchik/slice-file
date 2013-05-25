@@ -152,11 +152,22 @@ FA.prototype._readReverse = function (start, end, cb, rev) {
     if (end === undefined) end = 0;
     var index = 0, offset = self.stat.size;
     
-    for (var i = end; i < 0; i++) {
-        if (self.offsets[i] !== undefined) {
-            index = i;
-            offset = self.offsets[i];
-            break;
+    if (end < 0 && start < 0) {
+        for (var i = start; i >= 0; i--) {
+            if (self.offsets[i] !== undefined) {
+                index = i;
+                offset = self.offsets[i];
+                break;
+            }
+        }
+    }
+    else {
+        for (var i = end; i < 0; i++) {
+            if (self.offsets[i] !== undefined) {
+                index = i;
+                offset = self.offsets[i];
+                break;
+            }
         }
     }
     var buffer = new Buffer(self.bufsize);
