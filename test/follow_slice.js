@@ -8,7 +8,7 @@ var initSrc = [ 'one', 'two', 'three', 'four', 'five', 'six', '' ].join('\n');
 fs.writeFileSync(file, initSrc);
 
 test('slice a following instance', function (t) {
-    t.plan(5);
+    t.plan(6);
     
     var xs = sf(file);
     var res = [];
@@ -45,6 +45,13 @@ test('slice a following instance', function (t) {
                     lines.map(String),
                     [ 'one\n', 'two\n', 'three\n' ]
                 );
+                xs.slice(-3, function (err, lines) {
+                    t.deepEqual(
+                        lines.map(String),
+                        [ 'nine\n', 'ten\n', 'eleven\n' ]
+                    );
+                    xs.close();
+                })
                 xs.close();
             })
         }
