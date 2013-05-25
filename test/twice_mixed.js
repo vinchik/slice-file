@@ -11,17 +11,17 @@ test('forward mixed with reverse slice', function (t) {
     var first = [];
     var second = [];
     
-    xs.slice(-5).pipe(through(
+    xs.slice(0,5).pipe(through(
         function (line) {
             first.push(line.toString('utf8'));
         },
         function () {
             t.deepEqual(first, [
-                "épée's\n",
-                "épées\n",
-                "étude\n",
-                "étude's\n",
-                "études\n",
+                "A\n",
+                "A's\n",
+                "AA's\n",
+                "AB's\n",
+                "ABM's\n"
             ]);
             
             xs.sliceReverse(-10, -5).pipe(through(
