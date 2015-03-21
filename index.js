@@ -187,7 +187,7 @@ FA.prototype._readReverse = function (start, end, cb, rev) {
                         cb(null, Buffer(xs));
                     });
                 }
-                else if (lines.length) {
+                else if (lines && lines.length) {
                     cb(null, Buffer(lines[0]));
                 }
                 return cb(null, null);
