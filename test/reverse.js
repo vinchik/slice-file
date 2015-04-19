@@ -1,6 +1,6 @@
 var test = require('tap').test;
 var lf = require('../');
-var through = require('through');
+var through = require('through2');
 var fs = require('fs');
 var wordFile = __dirname + '/data/words';
 
@@ -12,9 +12,10 @@ test('short reverse tail', function (t) {
     
     xs.sliceReverse(-10).pipe(through(write, end));
     
-    function write (line) {
+    function write (line, _, next) {
         t.ok(Buffer.isBuffer(line));
         res.push(String(line));
+        next();
     }
     
     function end () {
@@ -45,13 +46,13 @@ test('long reverse tail', function (t) {
     (function shift () {
         if (amounts.length === 0) return;
         var n = amounts.shift();
-        console.log('n=' + n);
         var res = [];
         
         xs.sliceReverse(-n).pipe(through(write, end));
         
-        function write (line) {
+        function write (line, _, next) {
             res.push(String(line).trim());
+            next();
         }
         
         function end () {

@@ -1,6 +1,6 @@
 var test = require('tap').test;
 var sliceFile = require('../');
-var through = require('through');
+var through = require('through2');
 var fs = require('fs');
 var wordFile = __dirname + '/data/words';
 
@@ -12,8 +12,9 @@ test('forward mixed with reverse slice', function (t) {
     var second = [];
     
     xs.slice(0,5).pipe(through(
-        function (line) {
+        function (line, _, next) {
             first.push(line.toString('utf8'));
+            next();
         },
         function () {
             t.deepEqual(first, [
@@ -25,8 +26,9 @@ test('forward mixed with reverse slice', function (t) {
             ]);
             
             xs.sliceReverse(-10, -5).pipe(through(
-                function (line) {
+                function (line, _, next) {
                     second.push(line.toString('utf8'));
+                    next();
                 },
                 function () {
                     t.deepEqual(second, [

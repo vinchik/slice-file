@@ -1,6 +1,5 @@
 var test = require('tap').test;
 var sf = require('../');
-var through = require('through');
 var fs = require('fs');
 
 test('undefined begin, 0 end', function (t) {

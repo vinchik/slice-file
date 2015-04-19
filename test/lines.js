@@ -1,6 +1,6 @@
 var test = require('tap').test;
 var lf = require('../');
-var through = require('through');
+var through = require('through2');
 var fs = require('fs');
 
 test('lines', function (t) {
@@ -16,7 +16,7 @@ test('lines', function (t) {
     (function next (n) {
         var xs = [];
         s.slice(n).pipe(through(write, end));
-        function write (buf) { xs.push(String(buf)) }
+        function write (buf, _, next) { xs.push(String(buf)); next() }
         function end () {
             t.deepEqual(lines.slice(n), xs);
         }

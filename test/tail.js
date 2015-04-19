@@ -1,6 +1,6 @@
 var test = require('tap').test;
 var lf = require('../');
-var through = require('through');
+var through = require('through2');
 var fs = require('fs');
 var wordFile = __dirname + '/data/words';
 
@@ -12,9 +12,10 @@ test('short tail', function (t) {
     
     xs.slice(-10).pipe(through(write, end));
     
-    function write (line) {
+    function write (line, _, next) {
         t.ok(Buffer.isBuffer(line));
         res.push(String(line));
+        next();
     }
     
     function end () {
@@ -50,8 +51,9 @@ test('long tail', function (t) {
         
         xs.slice(-n).pipe(through(write, end));
         
-        function write (line) {
+        function write (line, _, next) {
             res.push(String(line).trim());
+            next();
         }
         
         function end () {

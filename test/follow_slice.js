@@ -1,7 +1,7 @@
 var test = require('tap').test;
 var sf = require('../');
 var fs = require('fs');
-var through = require('through');
+var through = require('through2');
 
 var file = __dirname + '/data/follow.txt';
 var initSrc = [ 'one', 'two', 'three', 'four', 'five', 'six', '' ].join('\n');
@@ -12,7 +12,7 @@ test('slice a following instance', function (t) {
     
     var xs = sf(file);
     var res = [];
-    xs.follow(-3).pipe(through(function (line) {
+    xs.follow(-3).pipe(through(function (line, _, next) {
         res.push(String(line));
         if (res.length === 3) {
             t.deepEqual(res, [ 'four\n', 'five\n', 'six\n' ]);
@@ -55,5 +55,6 @@ test('slice a following instance', function (t) {
                 xs.close();
             })
         }
+        next();
     }));
 });

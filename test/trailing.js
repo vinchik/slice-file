@@ -1,6 +1,5 @@
 var test = require('tap').test;
 var lf = require('../');
-var through = require('through');
 
 test('positive index trailing', function (t) {
     t.plan(1);

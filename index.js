@@ -1,8 +1,8 @@
 var fs = require('fs');
-var through = require('through');
+var through = require('through2');
 var EventEmitter = require('events').EventEmitter;
 var inherits = require('inherits');
-var split = require('split');
+var split = require('split2');
 
 var nextTick = typeof setImmediate === 'function'
     ? setImmediate
@@ -264,7 +264,7 @@ FA.prototype.slice = function (start, end, cb) {
     var tr = through();
     this._read(start, end, function (err, line) {
         if (err) return tr.emit('error', err);
-        else tr.queue(line)
+        else tr.push(line)
         
         if (cb && line === null) cb(null, res)
         else if (cb) res.push(line)
@@ -288,7 +288,7 @@ FA.prototype.sliceReverse = function (start, end, cb) {
     var tr = through();
     this._read(start, end, function (err, line) {
         if (err) return tr.emit('error', err);
-        else tr.queue(line)
+        else tr.push(line)
         
         if (cb && line === null) cb(null, res)
         else if (cb) res.push(line)
@@ -326,11 +326,12 @@ FA.prototype.follow = function (start, end) {
     });
     var lastStat = null;
     slice.pipe(tr, { end: false });
-    self.once('close', function () { tr.queue(null) });
-    tr.once('close', function () { tr.queue(null) });
+    self.once('close', function () { tr.push(null) });
+    tr.once('close', function () { tr.push(null) });
     
-    var out = tr.pipe(split()).pipe(through(function (line) {
-        if (line.length) this.queue(line + '\n');
+    var out = tr.pipe(split()).pipe(through(function (line, _, next) {
+        if (line.length) this.push(line + '\n');
+        next();
     }));
     tr.on('error', function (err) { out.emit('error', err) });
     return out;

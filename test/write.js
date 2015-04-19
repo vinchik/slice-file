@@ -1,7 +1,7 @@
 var test = require('tap').test;
 var sf = require('../');
 var fs = require('fs');
-var through = require('through');
+var through = require('through2');
 
 var file = __dirname + '/data/write.txt';
 var ws = fs.createWriteStream(file, { flags: 'w' });
@@ -19,8 +19,9 @@ test(function (t) {
         xs.close();
     }, 500);
     
-    function write (line) {
-        lines.push(line);
+    function write (line, _, next) {
+        lines.push(line.toString());
+        next();
     }
     
     function end () {

@@ -1,6 +1,6 @@
 var test = require('tap').test;
 var lf = require('../');
-var through = require('through');
+var through = require('through2');
 var fs = require('fs');
 var wordFile = __dirname + '/data/words';
 
@@ -11,7 +11,7 @@ test('implicit start=0', function (t) {
     var s = lf(file).sliceReverse();
     var res = [];
     s.pipe(through(write, end));
-    function write (buf) { res.push(String(buf)) }
+    function write (buf, _, next) { res.push(String(buf)); next() }
     function end () {
         t.deepEqual(res, [
             "\n",
@@ -33,9 +33,10 @@ test('first ten', function (t) {
     
     xs.sliceReverse(0,10).pipe(through(write, end));
     
-    function write (line) {
+    function write (line, _, next) {
         t.ok(Buffer.isBuffer(line));
         res.push(String(line));
+        next();
     }
     
     function end () {
@@ -82,13 +83,13 @@ test('slices', function (t) {
     (function shift () {
         if (slices.length === 0) return;
         var n = slices.shift();
-        console.log('n=' + n);
         var res = [];
         
         xs.sliceReverse(n[0], n[1]).pipe(through(write, end));
         
-        function write (line) {
+        function write (line, _, next) {
             res.push(String(line).trim());
+            next();
         }
         
         function end () {
