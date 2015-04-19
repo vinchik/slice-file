@@ -330,7 +330,7 @@ FA.prototype.follow = function (start, end) {
     tr.once('close', function () { tr.queue(null) });
     
     var out = tr.pipe(split()).pipe(through(function (line) {
-        this.queue(line + '\n');
+        if (line.length) this.queue(line + '\n');
     }));
     tr.on('error', function (err) { out.emit('error', err) });
     return out;
@@ -345,7 +345,6 @@ FA.prototype.follow = function (start, end) {
         else if (stat.size > lastStat.size) {
             writing = true;
             var stream = fs.createReadStream(self.file, {
-                //fd: self.fd,
                 start: lastStat.size,
                 flags: self.flags,
                 mode: self.mode,
