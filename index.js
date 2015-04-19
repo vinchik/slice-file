@@ -21,6 +21,8 @@ module.exports = function (file, opts) {
             if (err) return fa.emit('error', err)
             fa.fd = fd;
             fa.emit('open', fd)
+            for (var i = 0; i < fa._onopen.length; i++) fa._onopen[i]();
+            fa._onopen.splice(0);
         });
     }
     return fa;
@@ -32,15 +34,13 @@ function FA (file, opts) {
     this.bufsize = opts.bufsize || 4 * 1024;
     this.flags = opts.flags;
     this.mode = opts.mode;
+    this._onopen = [];
 }
 
 inherits(FA, EventEmitter);
 
-FA.prototype._read = function (start, end, cb, rev) {
+FA.prototype._read = onopen(function (start, end, cb, rev) {
     var self = this;
-    if (self.fd === undefined) {
-        return self.once('open', self._read.bind(self, start, end, cb, rev));
-    }
     if (start === undefined) start = 0;
     if (start < 0) return self._readReverse(start, end, cb, rev);
     
@@ -117,7 +117,7 @@ FA.prototype._read = function (start, end, cb, rev) {
             }
         });
     })();
-};
+});
 
 FA.prototype._stat = function (cb) {
     var self = this;
@@ -130,13 +130,8 @@ FA.prototype._stat = function (cb) {
     });
 };
 
-FA.prototype._readReverse = function (start, end, cb, rev) {
+FA.prototype._readReverse = onopen(function (start, end, cb, rev) {
     var self = this;
-    if (self.fd === undefined) {
-        return self.once('open', function () {
-            self._readReverse(start, end, cb, rev);
-        });
-    }
     if (self.stat === undefined) {
         return self._stat(function (err) {
             if (err) cb(err);
@@ -246,7 +241,7 @@ FA.prototype._readReverse = function (start, end, cb, rev) {
             }
         });
     })();
-};
+});
 
 FA.prototype.slice = function (start, end, cb) {
     var res;
@@ -365,10 +360,21 @@ FA.prototype.follow = function (start, end) {
     }
 };
 
-FA.prototype.close = function () {
+FA.prototype.close = onopen(function () {
     var self = this;
-    if (self.fd === undefined) return self.once('open', self.close);
     fs.close(self.fd, function () {
         self.emit('close');
     });
-};
+});
+
+function onopen (f) {
+    return function () {
+        var self = this, args = arguments;
+        if (self.fd === undefined) {
+            self._onopen.push(function () {
+                f.apply(self, args);
+            });
+        }
+        else return f.apply(self, args);
+    }
+}
