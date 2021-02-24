@@ -6,7 +6,7 @@
   "dependencies": {
     "inherits": "~1.0.0",
     "split2": "^0.2.1",
-    "through2": "3.0.2"
+    "through2": "2.0.3"
   },
   "devDependencies": {
     "tap": "^0.7.1"
